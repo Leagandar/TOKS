@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Status</title>
+	</head>
+	<body>
+		<div class="card" style="border-color: white">
+			<div class="card-body" class="mx-auto">
+				<h2 class="card-title">Status</h2>
+				<div class="list-group" id="statusField"></div>
+			</div>
+		</div>
+		<script>
+			const { ipcRenderer } = require("electron");
+			ipcRenderer.on("status", (event, arg) => {
+                console.log(arg);
+				let li = document.createElement("li");
+				if (arg.indexOf("failed") > 0) {
+					li.className = "list-group-item list-group-item-danger";
+				} else {
+					li.className = "list-group-item list-group-item-success";
+				}
+				li.appendChild(document.createTextNode(arg));
+				document.getElementById("statusField").appendChild(li);
+			});
+		</script>
+	</body>
+	<link
+		rel="stylesheet"
+		href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+		integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
+		crossorigin="anonymous"
+	/>
+	<script
+		src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+		integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+		crossorigin="anonymous"
+	></script>
+</html>

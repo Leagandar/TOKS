@@ -1,0 +1,23 @@
+{
+  "name": "toks_lab2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron .",
+    "package": "electron-packager . lab2App --platform=win32 --arch=x64",
+    "repackage": "electron-packager . lab2App --platform=win32 --arch=x64 --overwrite"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^10.1.1",
+    "electron-packager": "^15.1.0",
+    "electron-rebuild": "^2.0.3"
+  },
+  "dependencies": {
+    "electron-forge": "^5.2.4",
+    "serialport": "^9.0.1"
+  }
+}
