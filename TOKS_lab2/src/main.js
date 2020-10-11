@@ -1,71 +1,29 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
-const SerialPort = require("serialport");
 const path = require("path");
 const url = require("url");
 
 // var 19
 let inputInfoWindow,
-	outputInfoWindow,
-	statusWindow,
 	isInitialized = false,
-	baudRate = 57600,
 	flag = "77", // 119
 	ESCSymbol = "75", //117
 	encodeSymbol = "57", // 87
 	ESCEncodeSymbol = "65"; //101
 
-//wdsf
-
-const defaultWindowOptions = {
-	resizable: false,
-	autoHideMenuBar: true,
-	webPreferences: {
-		nodeIntegration: true,
-	},
-};
-
 function createWindow() {
-	outputInfoWindow = new BrowserWindow({
-		width: 500,
-		height: 300,
-		x: 80,
-		y: 400,
-		...defaultWindowOptions,
-	});
-	statusWindow = new BrowserWindow({
-		width: 650,
-		height: 620,
-		x: 600,
-		y: 80,
-		...defaultWindowOptions,
-	});
 	inputInfoWindow = new BrowserWindow({
-		width: 500,
-		height: 300,
-		x: 80,
-		y: 80,
-		...defaultWindowOptions,
+		width: 1000,
+		height: 600,
+		resizable: false,
+		autoHideMenuBar: true,
+		webPreferences: {
+			nodeIntegration: true,
+		},
 	});
 
 	inputInfoWindow.loadURL(
 		url.format({
-			pathname: path.join(__dirname, "./screens/inputWindow.html"),
-			protocol: "file:",
-			slashes: true,
-		})
-	);
-
-	outputInfoWindow.loadURL(
-		url.format({
-			pathname: path.join(__dirname, "./screens/outputWindow.html"),
-			protocol: "file:",
-			slashes: true,
-		})
-	);
-
-	statusWindow.loadURL(
-		url.format({
-			pathname: path.join(__dirname, "./screens/statusWindow.html"),
+			pathname: path.join(__dirname, "./infoWindow.html"),
 			protocol: "file:",
 			slashes: true,
 		})
@@ -75,18 +33,13 @@ function createWindow() {
 		inputInfoWindow = null;
 		app.quit();
 	});
-	outputInfoWindow.on("closed", function () {
-		outputInfoWindow = null;
-	});
-	statusWindow.on("closed", function () {
-		statusWindow = null;
-	});
 
 	ipcMain.on("data", onDataListener);
 	ipcMain.on("Initialization", onInitializationListener);
-	ipcMain.on("Exit", onExitListener);
+	ipcMain.on("Exit", () => {
+		app.quit();
+	});
 }
-
 const onInitializationListener = (event, data) => {
 	if (!isInitialized) {
 		let today = new Date();
@@ -96,11 +49,13 @@ const onInitializationListener = (event, data) => {
 			today.getMinutes() +
 			":" +
 			today.getSeconds();
-		if (statusWindow) {
-			statusWindow.webContents.send(
+		if (inputInfoWindow) {
+			let symbol = String.fromCharCode(parseInt(flag, 16));
+			inputInfoWindow.webContents.send(
 				"status",
-				`[${time}] Stuffing Flag: ${flag}.`
+				`[${time}] Stuffing Flag: ${flag}. Symbol of stuffing flag:${symbol}`
 			);
+			isInitialized = true;
 		}
 	}
 };
@@ -119,6 +74,19 @@ const onDataListener = (event, arg) => {
 
 	let stuffedData = byteStuffing(hexData);
 
+	let stuffedHexSequences = stuffedData.split(" ");
+	stuffedHexSequences.pop();
+
+	let resultStuffedData = [];
+	for (i = 0; i < stuffedHexSequences.length; i++) {
+		console.log("hex:" + stuffedHexSequences[i]);
+		let symbol = String.fromCharCode(parseInt(stuffedHexSequences[i], 16));
+		console.log("sym:" + symbol);
+		resultStuffedData.push(symbol);
+	}
+
+	stuffedResult = resultStuffedData.join("");
+
 	let deStuffedData = byteDeStuffing(stuffedData);
 
 	let hexSequences = deStuffedData.split(" ");
@@ -131,42 +99,34 @@ const onDataListener = (event, arg) => {
 
 	result = resultData.join("");
 
-	if (statusWindow) {
-		statusWindow.webContents.send(
+	if (inputInfoWindow) {
+		inputInfoWindow.webContents.send(
 			"status",
-			`[${time}] Byte-Stuffing of the data: ${stuffedData}`
+			`[${time}] Byte-Stuffing of the data: ${stuffedResult}`
 		);
-	}
-	if (outputInfoWindow) {
-		outputInfoWindow.webContents.send("outputReply", result);
+		inputInfoWindow.webContents.send("outputReply", result);
 	}
 };
 
 const byteStuffing = (hexData) => {
 	hexData = hexData
 		.split(ESCSymbol)
-		.join(`<${ESCSymbol} ${ESCEncodeSymbol}>`);
-	hexData = hexData
-		.split(flag)
-		.join(`<${ESCSymbol} ${encodeSymbol}>`); 
+		.join(`3C ${ESCSymbol} ${ESCEncodeSymbol} 3E`);
+	hexData = hexData.split(flag).join(`3C ${ESCSymbol} ${encodeSymbol} 3E`);
 
 	return hexData;
 };
 
 const byteDeStuffing = (stuffedData) => {
 	stuffedData = stuffedData
-		.split(`<${ESCSymbol} ${encodeSymbol}>`)
-		.join(flag); 
+		.split(`3C ${ESCSymbol} ${encodeSymbol} 3E`)
+		.join(flag);
 
 	stuffedData = stuffedData
-		.split(`<${ESCSymbol} ${ESCEncodeSymbol}>`)
-		.join(ESCSymbol); 
+		.split(`3C ${ESCSymbol} ${ESCEncodeSymbol} 3E`)
+		.join(ESCSymbol);
 
 	return stuffedData;
-};
-
-const onExitListener = (event, arg) => {
-	app.quit();
 };
 
 app.on("ready", createWindow);
