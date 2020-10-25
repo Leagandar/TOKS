@@ -68,6 +68,11 @@
 		</div>
 		<script>
 			const { ipcRenderer } = require("electron");
+
+			window.onload = () => {
+				ipcRenderer.send("Initialization", "Initialization");
+			}
+			
 			document.getElementById("Send").addEventListener("click", () => {
 				let info = document.getElementById("info").value;
 				if (info.length != 0) {

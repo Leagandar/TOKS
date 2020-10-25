@@ -34,12 +34,18 @@ function createWindow() {
 		app.quit();
 	});
 
+	inputInfoWindow.on("ready-to-show", function () {
+		console.log("erg");
+	});
+
 	ipcMain.on("data", onDataListener);
 	ipcMain.on("Initialization", onInitializationListener);
 	ipcMain.on("Exit", () => {
 		app.quit();
 	});
+	inputInfoWindow.show();
 }
+
 const onInitializationListener = (event, data) => {
 	if (!isInitialized) {
 		let today = new Date();
@@ -129,7 +135,10 @@ const byteDeStuffing = (stuffedData) => {
 	return stuffedData;
 };
 
-app.on("ready", createWindow);
+app.on("ready", () => {
+	createWindow();
+});
+
 
 app.on("window-all-closed", function () {
 	app.quit();
