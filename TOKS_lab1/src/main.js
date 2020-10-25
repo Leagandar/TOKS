@@ -11,6 +11,8 @@ let inputInfoWindow,
 	baudRate = 57600;
 
 const defaultWindowOptions = {
+	width: 500,
+	height: 300,
 	resizable: false,
 	autoHideMenuBar: true,
 	webPreferences: {
@@ -20,62 +22,26 @@ const defaultWindowOptions = {
 
 function createWindow() {
 	outputInfoWindow = new BrowserWindow({
-		width: 500,
-		height: 300,
+		...defaultWindowOptions,
 		x: 80,
 		y: 400,
-		resizable: false,
-		autoHideMenuBar: true,
-		webPreferences: {
-			nodeIntegration: true,
-		},
 	});
 	statusWindow = new BrowserWindow({
-		width: 650,
-		height: 620,
+		...defaultWindowOptions,
 		x: 600,
 		y: 80,
-		resizable: false,
-		autoHideMenuBar: true,
-		webPreferences: {
-			nodeIntegration: true,
-		},
+		width: 650,
+		height: 620,
 	});
 	inputInfoWindow = new BrowserWindow({
-		width: 500,
-		height: 300,
+		...defaultWindowOptions,
 		x: 80,
 		y: 80,
-		resizable: false,
-		autoHideMenuBar: true,
-		webPreferences: {
-			nodeIntegration: true,
-		},
 	});
 
-	inputInfoWindow.loadURL(
-		url.format({
-			pathname: path.join(__dirname, "./screens/inputWindow.html"),
-			protocol: "file:",
-			slashes: true,
-		})
-	);
-
-	outputInfoWindow.loadURL(
-		url.format({
-			pathname: path.join(__dirname, "./screens/outputWindow.html"),
-			protocol: "file:",
-			slashes: true,
-		})
-	);
-
-	statusWindow.loadURL(
-		url.format({
-			pathname: path.join(__dirname, "./screens/statusWindow.html"),
-			protocol: "file:",
-			slashes: true,
-		})
-	);
+	loadWindow(inputInfoWindow, "./screens/inputWindow.html");
+	loadWindow(outputInfoWindow, "./screens/outputWindow.html");
+	loadWindow(statusWindow, "./screens/statusWindow.html");
 
 	inputInfoWindow.on("closed", function () {
 		inputInfoWindow = null;
@@ -88,7 +54,7 @@ function createWindow() {
 		statusWindow = null;
 	});
 
-	ipcMain.on("dataRec", onDataListener);
+	ipcMain.on("dataRequest", onDataListener);
 	ipcMain.on("comInitialization", onInitializationListener);
 	ipcMain.on("Exit", onExitListener);
 }
@@ -115,7 +81,7 @@ const onInitializationListener = (event, data) => {
 					`[${time}] [COM3] Initialization... OK. Opening... OK. Baud Rate: ${baudRate}`
 				);
 			}
-		});
+		});	
 		COM4 = new SerialPort("COM4", { baudRate: 57600 }, (error) => {
 			if (error) {
 				statusWindow.webContents.send(
@@ -132,6 +98,16 @@ const onInitializationListener = (event, data) => {
 		});
 	}
 };
+
+const loadWindow = (window, pathOfFileToLoad) => {
+	window.loadURL(
+		url.format({
+			pathname: path.join(__dirname, pathOfFileToLoad),
+			protocol: "file:",
+			slashes: true,
+		})
+	);
+}
 
 const onDataListener = (event, arg) => {
 	let today = new Date();

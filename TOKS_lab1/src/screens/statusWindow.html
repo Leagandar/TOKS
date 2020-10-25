@@ -15,7 +15,6 @@
 		<script>
 			const { ipcRenderer } = require("electron");
 			ipcRenderer.on("status", (event, arg) => {
-                console.log(arg);
 				let li = document.createElement("li");
 				if (arg.indexOf("failed") > 0) {
 					li.className = "list-group-item list-group-item-danger";
@@ -24,7 +23,6 @@
 				}
 				li.appendChild(document.createTextNode(arg));
 				document.getElementById("status-field").appendChild(li);
-				//document.getElementById("status-field").innerHTML += arg;
 			});
 		</script>
 	</body>
