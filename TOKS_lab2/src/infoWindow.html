@@ -87,7 +87,6 @@
 				document.getElementById("OutputField").appendChild(li);
 			});
 			ipcRenderer.on("status", (event, arg) => {
-				console.log(arg);
 				let li = document.createElement("li");
 				if (arg.indexOf("failed") > 0) {
 					li.className = "list-group-item list-group-item-danger";

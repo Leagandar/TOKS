@@ -34,10 +34,6 @@ function createWindow() {
 		app.quit();
 	});
 
-	inputInfoWindow.on("ready-to-show", function () {
-		console.log("erg");
-	});
-
 	ipcMain.on("data", onDataListener);
 	ipcMain.on("Initialization", onInitializationListener);
 	ipcMain.on("Exit", () => {
@@ -85,9 +81,7 @@ const onDataListener = (event, arg) => {
 
 	let resultStuffedData = [];
 	for (i = 0; i < stuffedHexSequences.length; i++) {
-		console.log("hex:" + stuffedHexSequences[i]);
 		let symbol = String.fromCharCode(parseInt(stuffedHexSequences[i], 16));
-		console.log("sym:" + symbol);
 		resultStuffedData.push(symbol);
 	}
 
