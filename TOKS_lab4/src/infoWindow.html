@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<style>
+			.container {
+				display: flex;
+				flex-direction: row;
+				justify-content: flex-start;
+			}
+			.outputContainer {
+				max-width: 400px;
+				min-width: 400px;
+			}
+			.statusContainer {
+				max-width: 800px;
+				width: 600px;
+			}
+		</style>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Info Window</title>
+	</head>
+	<body>
+		<div class="container">
+			<div class="outputContainer">
+				<div class="card" style="border-color: white">
+					<div class="card-body" class="mx-auto">
+						<h2 class="card-title">Transmitter</h2>
+						<input
+							id="info"
+							class="form-control text-input"
+							placeholder="Data to send"
+							class="mx-auto"
+							style="margin-bottom: 1rem"
+						/>
+						<button
+							type="button"
+							id="Send"
+							class="btn btn-primary btn-lg btn-block"
+						>
+							Send
+						</button>
+						<button
+							type="button"
+							id="Exit"
+							class="btn btn-secondary btn-lg btn-block"
+						>
+							Exit
+						</button>
+					</div>
+				</div>
+				<div class="card" style="border-color: white">
+					<div class="card-body" class="mx-auto">
+						<h2 class="card-title">Receiver</h2>
+						<ul
+							class="list-group list-group-flush"
+							id="OutputField"
+						></ul>
+					</div>
+				</div>
+			</div>
+			<div class="card" style="border-color: white">
+				<div class="card-body" class="mx-auto">
+					<h2 class="card-title">Status</h2>
+					<div class="list-group" id="statusField"></div>
+				</div>
+			</div>
+		</div>
+		<script>
+			const { ipcRenderer } = require("electron");
+
+			window.onload = () => {
+				ipcRenderer.send("Initialization", "Initialization");
+			};
+
+			document.getElementById("Send").addEventListener("click", () => {
+				let info = document.getElementById("info").value;
+				if (info.length != 0) {
+					ipcRenderer.send("Initialization", "Initialization");
+					ipcRenderer.send("data", info);
+				}
+			});
+			ipcRenderer.on("outputReply", (event, arg) => {
+				let li = document.createElement("li");
+				li.className = "list-group-item";
+				li.appendChild(document.createTextNode(arg));
+				document.getElementById("OutputField").appendChild(li);
+			});
+			ipcRenderer.on("status", (event, arg) => {
+				let li = document.createElement("li");
+				li.className = "list-group-item list-group-item-success";
+				li.appendChild(document.createTextNode(arg));
+				document.getElementById("statusField").appendChild(li);
+			});
+			document.getElementById("Exit").addEventListener("click", () => {
+				ipcRenderer.send("Exit", "Exit");
+			});
+		</script>
+	</body>
+	<link
+		rel="stylesheet"
+		href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+		integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
+		crossorigin="anonymous"
+	/>
+	<script
+		src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+		integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+		crossorigin="anonymous"
+	></script>
+</html>
