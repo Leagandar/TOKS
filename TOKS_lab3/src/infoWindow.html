@@ -71,8 +71,8 @@
 
 			window.onload = () => {
 				ipcRenderer.send("Initialization", "Initialization");
-			}
-			
+			};
+
 			document.getElementById("Send").addEventListener("click", () => {
 				let info = document.getElementById("info").value;
 				if (info.length != 0) {
@@ -88,11 +88,7 @@
 			});
 			ipcRenderer.on("status", (event, arg) => {
 				let li = document.createElement("li");
-				if (arg.indexOf("failed") > 0) {
-					li.className = "list-group-item list-group-item-danger";
-				} else {
-					li.className = "list-group-item list-group-item-success";
-				}
+				li.className = "list-group-item list-group-item-success";
 				li.appendChild(document.createTextNode(arg));
 				document.getElementById("statusField").appendChild(li);
 			});

@@ -4,7 +4,7 @@ const path = require("path");
 const url = require("url");
 
 // var 19
-let inputInfoWindow;
+let inputInfoWindow, isInitialized = false;
 
 function createWindow() {
 	inputInfoWindow = new BrowserWindow({
@@ -46,17 +46,26 @@ const onDataListener = (event, arg) => {
 	sourceData = arg.toString();
 	let chunkArray = CRC.CRCCreateChunks(sourceData);
 	let result = chunkArray.map((chunk) => {
-		console.log(chunk.join(""));
 		return (
 			chunk.join("") + " : <" + CRC.CRCEncoder(chunk).toString(2) + ">"
 		);
 	});
 
 	if (inputInfoWindow) {
-		inputInfoWindow.webContents.send(
-			"status",
-			`[${time}] Data chunks:\n ${result}`
-		);
+		if(!isInitialized){
+			inputInfoWindow.webContents.send(
+				"status",
+				`[${time}] Data chunks:\n`
+			);
+			isInitialized = true;
+		}
+		result.forEach((element) => {
+			inputInfoWindow.webContents.send(
+				"status",
+				`${element}`
+			);
+		})
+		
 		inputInfoWindow.webContents.send("outputReply", arg);
 	}
 };
